@@ -6,7 +6,7 @@ import { EmailService } from "./email.service";
 export class AuthService {
 
     constructor(
-        private readonly emailService: EmailService
+        private readonly emailService: EmailService,
     ) {}
 
     public async registerUser(registerUserDto: RegisterUserDto) {
@@ -58,15 +58,30 @@ export class AuthService {
             user: userEntity,
             token: token,
         }
-        // isMatch... bcrypt...compare(123456, KJjsadjaksakj)
-
     }
 
     private sendEmailValidationLink = async (email: string) => {
-        const token = await JwtAdapter.generateToken({ email }, '1h');
+        const token = await JwtAdapter.generateToken({ email });
         if (!token) throw CustomError.internalServer('Error getting token');
 
         const link = `${envs.WEBSERVICE_URL}/auth/validate-email/${token}`;
+        const html = `
+            <h1>Validate your email</h1>
+            <p>Click on the followling link to validate your email:</p>
+            <a href="${link}">Validate your email: ${email}</a>
+        `;
+
+        const options = {
+            to: email,
+            subject: 'Validate your email',
+            htmlBody: html,
+        }
+
+        const isSent = await this.emailService.sendEmail(options);
+        if(!isSent) throw CustomError.internalServer('Error sending email');
+
+        return true;
+
     }
 
 }
