@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { FileUploadMiddleware } from '../middlewares/file-upload.middleware';
 import { FileUploadService } from '../services/file-upload.service';
 import { FileUploadController } from './controller';
 
@@ -7,6 +8,7 @@ export class FileUploadRoutes {
     const router = Router();
     const controller = new FileUploadController(new FileUploadService());
 
+    router.use(FileUploadMiddleware.containFiles);
     // Definir las rutas
     // api/upload/single/<user|category|product>/
     // api/upload/multiple/<user|category|product>/
